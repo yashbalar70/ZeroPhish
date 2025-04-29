@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZeroPhish | Phishing Detector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+</head>
+<body>
+  <div class="background">
+    <div class="matrix"></div>
+  </div>
+
+  <div class="container">
+    <div class="logo">
+      <h2><span class="glow">ZeroPhish</span></h2>
+      <p class="tagline">Protecting You From Phishing Websites</p>
+      <hr class="divider"/>
+    </div>
+
+    <div class="main-content">
+      <div class="scanner">
+        <h3>Scan a Website</h3>
+        <input type="text" id="urlInput" placeholder="Enter URL here" />
+        <button onclick="checkURL()">Scan URL</button>
+        <p id="status">Status: ⏳ Waiting...</p>
+        <p id="result"></p>
+        <button id="logBtn" onclick="toggleLogs()" title="View Logs">
+          <img src="logs.png" alt="Logs Icon"/>
+        </button>
+      </div>
+    
+      <div id="logSection" class="logs-side">
+          <h3>ZeroPhish Log Report</h3>
+          <p id="userInfo"></p>
+        <pre id="logs">No logs yet.</pre> 
+      </div>
+  <footer class="footer">
+    <p>&copy; 2025 ZeroPhish | Yash Balar | 22SS02CA001</p>
+  </footer>
+  <script>
+    async function checkURL() {
+      const url = document.getElementById("urlInput").value;
+      const resultElement = document.getElementById("result");
+      const statusElement = document.getElementById("status");
+      const logsElement = document.getElementById("logs");
+
+      if (!url) {
+        resultElement.innerText = "⚠️ Please enter a URL.";
+        return;
+      }
+
+      statusElement.innerText = "Status: 🔍 Scanning...";
+      resultElement.innerText = "";
+      logsElement.innerText = "";
+
+      try {
+        const res = await fetch("http://localhost:5001/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: url })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          const summary = data.result === "Phishing"
+            ? "⚠️ Phishing Site Detected ⚠️"
+            : "✅ Site Looks Safe!";
+          resultElement.innerText = summary;
+          statusElement.innerText = "Status: ✅ Scan Complete";
+
+          let breakdown = "";
+          for (const [key, value] of Object.entries(data.details)) {
+            breakdown += `• ${key}: ${value ? "Suspicious" : "Safe"}\n`;
+          }
+          breakdown += `\nTotal Suspicious Flags: ${data.score}`;
+          logsElement.innerText = breakdown;
+        } else {
+          resultElement.innerText = "❌ Error: " + (data.error || "Something went wrong.");
+          statusElement.innerText = "Status: ❌ Error during scan";
+        }
+      } catch (error) {
+        resultElement.innerText = "❌ Failed to connect to backend.";
+        statusElement.innerText = "Status: ❌ Backend Error";
+        console.error(error);
+      }
+    }
+
+    function toggleLogs() {
+      const logSection = document.getElementById("logSection");
+      logSection.style.display = logSection.style.display === "none" ? "block" : "none";
+    }
+  </script>
+</body>
+</html>
