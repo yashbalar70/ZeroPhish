@@ -27,3 +27,11 @@ ZeroPhish performs a sequence of heuristic checks on a URL. If any suspicious tr
 
 ## 📂 Project Structure
 
+ZeroPhish/
+├── backend/
+│   ├── app.py           
+│   ├── logic.py         
+├── frontend/
+│   ├── index.html       
+│   ├── style.css       
+├── requirements.txt     
